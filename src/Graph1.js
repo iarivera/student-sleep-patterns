@@ -13,58 +13,93 @@ function Graph1({ data }) {
     svg.selectAll('*').remove();
 
     const margin = { top: 20, right: 30, bottom: 70, left: 70 };
-    const genderGroups = ['Male', 'Female', 'Other'];
+    //const genderGroups = ['Male', 'Female', 'Other'];
 
-    const groupedData = d3.group(data, d => d.University_Year);
+    //data.sort(d3.ascending(d => d.University_Year));
+    // Put all students together based on year
+    const groupedData = d3.rollup(
+      data,
+      group => group.length, 
+      d => d.University_Year);    
 
-    const preparedData = Array.from(groupedData).map(([year, entries]) => {
-      const maleData = entries.filter(d => d.Gender === 'Male');
-      const femaleData = entries.filter(d => d.Gender === 'Female');
-      const otherData = entries.filter(d => d.Gender === 'Other');
+    // Set up data
+    const preparedData = Array.from(groupedData, ([year, count]) => ({
+      University_Year: year,
+      Student_Count: count,
+    }));
 
-      return {
-        University_Year: year,
-        Male: d3.mean(maleData, d => +d.Sleep_Duration), // Calculate average sleep duration for Male
-        Female: d3.mean(femaleData, d => +d.Sleep_Duration), // Calculate average sleep duration for Female
-        Other: d3.mean(otherData, d => +d.Sleep_Duration) // Calculate average sleep duration for Other
-      };
-    });
-
-    const x0 = d3
+    const x = d3
       .scaleBand()
       .domain(preparedData.map(d => d.University_Year))
       .range([margin.left, width - margin.right])
       .padding(0.2);
 
-    const x1 = d3
-      .scaleBand()
-      .domain(genderGroups)
-      .range([0, x0.bandwidth()])
-      .padding(0.05);
 
     const y = d3
       .scaleLinear()
-      .domain([0, d3.max(preparedData, d => d.Male + d.Female + d.Other)])
+      .domain([0, d3.max(preparedData, d => d.Student_Count)])
       .nice()
       .range([height - margin.bottom, margin.top]);
       
-    const color = d3.scaleOrdinal()
-      .domain(genderGroups)
-      .range(['#1f77b4', '#ff7f0e', '#2ca02c']);
-  })
+    // Tooltip setup
+    const tooltip = d3.select('body')
+      .append('div')
+      .style('position', 'absolute')
+      .style('background', 'lightgray')
+      .style('padding', '5px')
+      .style('border-radius', '5px')
+      .style('pointer-events', 'none')
+      .style('opacity', 0);
 
-  return (
-    <div style={{ flex: 1, border: '1px solid black', margin: '5px', padding: '10px' }}>
-      <h3>Graph 1</h3>
-      {data ? (
-        <svg width="100%" height="100%">
-          {/* Render specific graph using D3 here */}
-        </svg>
-      ) : (
-        <p>Upload a CSV file to display the graph</p>
-      )}
-    </div>
-  );
+    // Bars for student count
+    svg
+      .selectAll('g')
+      .data(preparedData)
+      .join('rect')
+      .attr('x', d => x(d.University_Year))
+      .attr('y', d=> y(d.Student_Count))
+      .attr('height', d => y(0) - y(d.Student_Count))
+      .attr('width', x.bandwidth())
+      .attr('fill', '#1f77b4')
+      .on('mouseover', (event, d) => {
+        tooltip.style('opacity', 1);
+        tooltip.html(
+          `Male: <br> Female: <br> Other:`
+        );
+      })
+      .on('mousemove', event => {
+        tooltip
+        .style('left', `${event.pageX + 10}px`)
+        .style('top', `${event.pageY - 20}px`);
+    })
+    .on('mouseout', () => tooltip.style('opacity', 0));
+    
+    
+    // X-axis
+    svg
+      .append('g')
+      .attr('transform', `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(x))
+      .selectAll('text') // Rotate x-axis labels
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end');
+    
+    // Y-axis
+    svg
+      .append('g')
+      .attr('transform', `translate(${margin.left},0)`)
+      .call(d3.axisLeft(y).ticks(6));
+
+    // Y-axis title
+    svg
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(${margin.left / 2},${height / 2})rotate(-90)`)
+      .text('Number of Students Per Year')
+      .style('font-size', '12px');
+  }, [data]);
+
+  return <svg ref={svgRef} width={width} height={height}></svg>;
 }
 
 export default Graph1;

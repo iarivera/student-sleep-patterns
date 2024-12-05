@@ -7,7 +7,7 @@ function Graph2({ data }) {
   const height = 450; // Height of the graph
 
   useEffect(() => {
-    if (!data) return;
+    if (!data) {return} 
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove(); // Clear previous render
@@ -123,7 +123,7 @@ function Graph2({ data }) {
       .data(genderGroups)
       .enter()
       .append('rect')
-      .attr('x', (d, i) => width - margin.right - 120 + i * 70)
+      .attr('x', (d, i) => width - margin.right - 200 + i * 70)
       .attr('y', 10)
       .attr('width', 10)
       .attr('height', 10)
@@ -135,7 +135,7 @@ function Graph2({ data }) {
       .data(genderGroups)
       .enter()
       .append('text')
-      .attr('x', (d, i) => width - margin.right - 105 + i * 70)
+      .attr('x', (d, i) => width - margin.right - 185 + i * 70)
       .attr('y', 20)
       .text(d => d)
       .style('font-size', '12px')
