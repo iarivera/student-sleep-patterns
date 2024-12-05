@@ -41,7 +41,6 @@ function Graph1({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
       
-    // Tooltip setup
     const tooltip = d3.select('body')
       .append('div')
       .style('position', 'absolute')
@@ -64,7 +63,7 @@ function Graph1({ data }) {
       .on('mouseover', (event, d) => {
         tooltip.style('opacity', 1);
         tooltip.html(
-          `Male: <br> Female: <br> Other:`
+          `${d.University_Year} <br> Male: <br> Female: <br> Other:`
         );
       })
       .on('mousemove', event => {
