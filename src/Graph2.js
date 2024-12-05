@@ -14,6 +14,7 @@ function Graph2({ data }) {
 
     const margin = { top: 20, right: 30, bottom: 70, left: 70 };
     const genderGroups = ['Male', 'Female', 'Other']; // Include "Other" in gender groups
+    const yearOrder = ['1st Year', '2nd Year', '3rd Year', '4th Year']; // Order the data by University Year
 
     // Group the data by University Year and Gender, then calculate the average sleep duration for each gender
     const groupedData = d3.group(data, d => d.University_Year);
@@ -35,7 +36,7 @@ function Graph2({ data }) {
     // Create scales for the axes
     const x0 = d3
       .scaleBand()
-      .domain(preparedData.map(d => d.University_Year))
+      .domain(yearOrder)
       .range([margin.left, width - margin.right])
       .padding(0.2);
 

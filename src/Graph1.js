@@ -14,8 +14,8 @@ function Graph1({ data }) {
 
     const margin = { top: 20, right: 30, bottom: 70, left: 70 };
     //const genderGroups = ['Male', 'Female', 'Other'];
+    const yearOrder = ['1st Year', '2nd Year', '3rd Year', '4th Year']; // Order the data by University Year
 
-    //data.sort(d3.ascending(d => d.University_Year));
     // Put all students together based on year
     const groupedData = d3.rollup(
       data,
@@ -30,7 +30,7 @@ function Graph1({ data }) {
 
     const x = d3
       .scaleBand()
-      .domain(preparedData.map(d => d.University_Year))
+      .domain(yearOrder)
       .range([margin.left, width - margin.right])
       .padding(0.2);
 
