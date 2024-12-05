@@ -7,13 +7,14 @@ function Graph2({ data }) {
   const height = 450; // Height of the graph
 
   useEffect(() => {
-    if (!data) return;
+    if (!data) {return} 
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove(); // Clear previous render
 
     const margin = { top: 20, right: 30, bottom: 70, left: 70 };
     const genderGroups = ['Male', 'Female', 'Other']; // Include "Other" in gender groups
+    const yearOrder = ['1st Year', '2nd Year', '3rd Year', '4th Year']; // Order the data by University Year
 
     // Group the data by University Year and Gender, then calculate the average sleep duration for each gender
     const groupedData = d3.group(data, d => d.University_Year);
@@ -35,7 +36,7 @@ function Graph2({ data }) {
     // Create scales for the axes
     const x0 = d3
       .scaleBand()
-      .domain(preparedData.map(d => d.University_Year))
+      .domain(yearOrder)
       .range([margin.left, width - margin.right])
       .padding(0.2);
 
@@ -123,7 +124,7 @@ function Graph2({ data }) {
       .data(genderGroups)
       .enter()
       .append('rect')
-      .attr('x', (d, i) => width - margin.right - 120 + i * 70)
+      .attr('x', (d, i) => width - margin.right - 200 + i * 70)
       .attr('y', 10)
       .attr('width', 10)
       .attr('height', 10)
@@ -135,7 +136,7 @@ function Graph2({ data }) {
       .data(genderGroups)
       .enter()
       .append('text')
-      .attr('x', (d, i) => width - margin.right - 105 + i * 70)
+      .attr('x', (d, i) => width - margin.right - 185 + i * 70)
       .attr('y', 20)
       .text(d => d)
       .style('font-size', '12px')
