@@ -37,7 +37,7 @@ function Graph3({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    // Create density data
+    // Create density data with more thresholds for finer gradation
     const densityData = d3
       .contourDensity()
       .x((d) => x(d.Study_Hours))
@@ -46,13 +46,48 @@ function Graph3({ data }) {
         width - margin.left - margin.right,
         height - margin.top - margin.bottom,
       ])
-      .bandwidth(30)
-      .thresholds(10)(parsedData);
+      .bandwidth(25) // Slightly smaller bandwidth for more detail
+      .thresholds(15)(parsedData); // More thresholds for finer gradation
 
-    // Add grid lines
+    // Create opacity scale based on density values
+    const opacityScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(densityData, (d) => d.value),
+        d3.max(densityData, (d) => d.value),
+      ])
+      .range([0.1, 0.8]); // Wider opacity range
+
+    // Calculate point density for each data point
+    const pointDensity = new Map();
+    parsedData.forEach((point1) => {
+      let nearbyPoints = 0;
+      parsedData.forEach((point2) => {
+        const distance = Math.sqrt(
+          Math.pow(point1.Study_Hours - point2.Study_Hours, 2) +
+            Math.pow(point1.Sleep_Quality - point2.Sleep_Quality, 2)
+        );
+        if (distance < 1) {
+          // Adjust this threshold to control what's considered "nearby"
+          nearbyPoints++;
+        }
+      });
+      pointDensity.set(point1, nearbyPoints);
+    });
+
+    // Create point opacity scale
+    const pointOpacityScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(Array.from(pointDensity.values())),
+        d3.max(Array.from(pointDensity.values())),
+      ])
+      .range([0.2, 0.9]); // More transparent for sparse areas, more opaque for dense areas
+
+    // Add y-axis grid lines
     svg
       .append("g")
-      .attr("class", "grid")
+      .attr("class", "grid y-grid")
       .attr("transform", `translate(${margin.left},0)`)
       .call(
         d3
@@ -65,7 +100,23 @@ function Graph3({ data }) {
       .selectAll("line")
       .style("stroke-dasharray", "2,2");
 
-    // Add contours
+    // Add x-axis grid lines
+    svg
+      .append("g")
+      .attr("class", "grid x-grid")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(
+        d3
+          .axisBottom(x)
+          .tickSize(-(height - margin.top - margin.bottom))
+          .tickFormat("")
+      )
+      .style("stroke", "#cccccc")
+      .style("stroke-opacity", 0.8)
+      .selectAll("line")
+      .style("stroke-dasharray", "2,2");
+
+    // Add contours with dynamic opacity
     const contours = svg.append("g").attr("class", "contours");
 
     contours
@@ -76,7 +127,7 @@ function Graph3({ data }) {
       .attr("d", d3.geoPath())
       .attr("fill", "none")
       .attr("stroke", "#666")
-      .attr("stroke-opacity", 0.5)
+      .attr("stroke-opacity", (d) => opacityScale(d.value))
       .attr("stroke-width", 0.5)
       .attr("transform", `translate(${0}, ${0})`);
 
@@ -91,7 +142,7 @@ function Graph3({ data }) {
       }
     };
 
-    // Add scatter plot points with different shapes
+    // Add scatter plot points with different shapes and dynamic opacity
     const points = svg.append("g").attr("class", "points");
 
     points
@@ -115,7 +166,7 @@ function Graph3({ data }) {
         (d) => `translate(${x(d.Study_Hours)},${y(d.Sleep_Quality)})`
       )
       .style("fill", (d) => color(d.Gender))
-      .style("opacity", 0.6);
+      .style("opacity", (d) => pointOpacityScale(pointDensity.get(d)));
 
     // Add axes
     svg
@@ -173,7 +224,8 @@ function Graph3({ data }) {
         "transform",
         (d, i) => `translate(${width - margin.right - 195 + i * 70}, 15)`
       )
-      .attr("fill", (d) => color(d));
+      .attr("fill", (d) => color(d))
+      .style("opacity", 0.9); // Keep legend shapes fully visible
 
     // Add text to legend
     legendGroup
