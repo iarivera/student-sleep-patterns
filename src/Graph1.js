@@ -53,6 +53,22 @@ function Graph1({ data }) {
       .domain(genderGroups)
       .range(["#1f77b4", "#ff7f0e", "#2ca02c"]); // Blue for Male, Orange for Female, Green for Other
 
+    // Add grid lines
+    svg
+      .append("g")
+      .attr("class", "grid")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(
+        d3
+          .axisLeft(y)
+          .tickSize(-width + margin.left + margin.right)
+          .tickFormat("")
+      )
+      .style("stroke", "#cccccc")
+      .style("stroke-opacity", 0.8)
+      .selectAll("line")
+      .style("stroke-dasharray", "2,2"); // Optional: makes the lines dashed
+
     const tooltip = d3
       .select("body")
       .append("div")
