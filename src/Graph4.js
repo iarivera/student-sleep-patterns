@@ -13,7 +13,7 @@ function Graph4({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
     // Calculate gender distribution
     const genderCounts = d3.rollup(
@@ -95,6 +95,16 @@ function Graph4({ data }) {
       .style("font-size", "13px")
       .style("fill", "black")
       .text((d) => `(${d.data.count})`);
+
+    // Add title
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Gender Distribution of Students");
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;

@@ -13,7 +13,7 @@ function Graph2({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
     // Group the data by University Year and Gender, then calculate the average sleep duration for each gender
     const groupedData = d3.group(data, (d) => d.University_Year);
@@ -54,6 +54,16 @@ function Graph2({ data }) {
       .domain([0, maxValue * 1.3])
       .nice()
       .range([height - margin.bottom, margin.top]);
+
+    // Add title
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Average Sleep Duration Across University Years");
 
     // Add grid lines
     svg
