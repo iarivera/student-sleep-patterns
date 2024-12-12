@@ -4,6 +4,7 @@ import Graph1 from "./Graph1";
 import Graph2 from "./Graph2";
 import Graph3 from "./Graph3";
 import Graph4 from "./Graph4";
+import Graph5 from "./Graph5";
 import Legend from "./Legend";
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         <Graph2 data={data} />
         <Graph3 data={data} />
         <Graph4 data={data} />
+        <Graph5 data={data} />
       </div>
     </div>
   );
