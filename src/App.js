@@ -7,6 +7,7 @@ import Graph4 from "./Graph4";
 import Graph5 from "./Graph5";
 import Graph6 from "./Graph6";
 import Legend from "./Legend";
+import "./App.css";
 
 function App() {
   const [data, setData] = useState(null);
@@ -27,25 +28,12 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="dashboard-container">
       <input type="file" accept=".csv" onChange={handleFileUpload} />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="legend-container">
         <Legend />
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "20px",
-          justifyContent: "space-between",
-        }}
-      >
+      <div className="graphs-grid">
         <Graph1 data={data} />
         <Graph2 data={data} />
         <Graph3 data={data} />

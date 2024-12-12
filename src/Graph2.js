@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { genderGroups, colorScheme, yearOrder } from "./Legend";
+import { yearOrder, genderGroups, colorScheme } from "./utils";
 
 function Graph2({ data }) {
   const svgRef = useRef();
@@ -12,6 +12,9 @@ function Graph2({ data }) {
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
+
+    // Set initial opacity to 0 for fade-in
+    svg.style("opacity", 0);
 
     const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
@@ -55,16 +58,6 @@ function Graph2({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    // Add title
-    svg
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", margin.top - 10)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("font-weight", "bold")
-      .text("Average Sleep Duration Across University Years");
-
     // Add grid lines
     svg
       .append("g")
@@ -81,6 +74,17 @@ function Graph2({ data }) {
       .selectAll("line")
       .style("stroke-dasharray", "2,2");
 
+    // Add title with initial opacity 0
+    const title = svg
+      .append("text")
+      .attr("x", (width + margin.left - margin.right) / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .style("opacity", 0)
+      .text("Average Sleep Duration Across University Years");
+
     // Create tooltip
     const tooltip = d3
       .select("body")
@@ -92,8 +96,8 @@ function Graph2({ data }) {
       .style("pointer-events", "none")
       .style("opacity", 0);
 
-    // Create the bars for each gender and university year
-    svg
+    // Create bars with initial height 0
+    const bars = svg
       .selectAll("g.year")
       .data(preparedData)
       .join("g")
@@ -109,9 +113,9 @@ function Graph2({ data }) {
       )
       .join("rect")
       .attr("x", (d) => x1(d.key))
-      .attr("y", (d) => y(d.value || 0))
-      .attr("height", (d) => y(0) - y(d.value || 0))
       .attr("width", x1.bandwidth())
+      .attr("y", height - margin.bottom) // Start from bottom
+      .attr("height", 0) // Initial height 0
       .attr("fill", (d) => colorScheme[d.key])
       .on("mouseover", (event, d) => {
         tooltip.style("opacity", 1);
@@ -128,23 +132,26 @@ function Graph2({ data }) {
       })
       .on("mouseout", () => tooltip.style("opacity", 0));
 
-    // X-axis
-    svg
+    // Add axes with initial opacity 0
+    const xAxis = svg
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(d3.axisBottom(x0))
+      .style("opacity", 0)
+      .call(d3.axisBottom(x0));
+
+    xAxis
       .selectAll("text")
       .attr("transform", "rotate(-30)")
       .style("text-anchor", "end");
 
-    // Y-axis
-    svg
+    const yAxis = svg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
+      .style("opacity", 0)
       .call(d3.axisLeft(y).ticks(6));
 
-    // Y-axis Title
-    svg
+    // Y-axis title with initial opacity 0
+    const yAxisTitle = svg
       .append("text")
       .attr("text-anchor", "middle")
       .attr(
@@ -152,7 +159,29 @@ function Graph2({ data }) {
         `translate(${margin.left / 2},${height / 2})rotate(-90)`
       )
       .text("Average Sleep Duration (hours)")
-      .style("font-size", "12px");
+      .style("font-size", "12px")
+      .style("opacity", 0);
+
+    // Fade in the entire graph
+    svg
+      .transition()
+      .duration(300)
+      .style("opacity", 1)
+      .on("end", () => {
+        // After graph fades in, animate the bars
+        bars
+          .transition()
+          .duration(1000)
+          .delay((d, i) => i * 50)
+          .attr("y", (d) => y(d.value || 0))
+          .attr("height", (d) => y(0) - y(d.value || 0));
+
+        // Fade in axes, title, and labels
+        title.transition().duration(750).style("opacity", 1);
+        xAxis.transition().duration(750).style("opacity", 1);
+        yAxis.transition().duration(750).style("opacity", 1);
+        yAxisTitle.transition().duration(750).style("opacity", 1);
+      });
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;
