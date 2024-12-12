@@ -13,7 +13,7 @@ function Graph1({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
     // Group data by year and gender
     const groupedData = yearOrder.map((year) => {
@@ -46,6 +46,16 @@ function Graph1({ data }) {
       .domain([0, d3.max(stackedData[stackedData.length - 1], (d) => d[1])])
       .nice()
       .range([height - margin.bottom, margin.top]);
+
+    // Add title
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Students per Year");
 
     // Add grid lines
     svg

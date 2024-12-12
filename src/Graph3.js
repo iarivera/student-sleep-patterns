@@ -13,7 +13,7 @@ function Graph3({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
     const parsedData = data.map((d) => ({
       Study_Hours: parseFloat(d.Study_Hours),
@@ -56,6 +56,16 @@ function Graph3({ data }) {
         d3.max(Array.from(pointDensity.values())),
       ])
       .range([0.2, 0.9]);
+
+    // Add title
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Study Hours vs Sleep Quality");
 
     // Add y-axis grid lines
     svg

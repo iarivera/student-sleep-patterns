@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { yearOrder } from "./Legend";
+import { yearOrder, genderGroups, colorScheme } from "./Legend";
 
 function Graph5({ data }) {
   const svgRef = useRef();
@@ -13,11 +13,10 @@ function Graph5({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
     // Calculate average screen time for each year and gender with error handling
-    const genders = ["Male", "Female", "Other"];
-    const screenTimeByYearAndGender = genders
+    const screenTimeByYearAndGender = genderGroups
       .map((gender) => {
         return yearOrder.map((year) => {
           const yearGenderData = data.filter(
@@ -52,11 +51,15 @@ function Graph5({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    // Color scale for genders
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(genders)
-      .range(["#1f77b4", "#ff7f0e", "#2ca02c"]);
+    // Add title
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", margin.top - 10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Daily Screen Time Trends by University Year");
 
     // Add grid lines
     svg
@@ -108,7 +111,7 @@ function Graph5({ data }) {
       .y((d) => y(d.screenTime))
       .defined((d) => d.screenTime > 0);
 
-    genders.forEach((gender, index) => {
+    genderGroups.forEach((gender) => {
       const genderData = screenTimeByYearAndGender.filter(
         (d) => d.gender === gender
       );
@@ -118,7 +121,7 @@ function Graph5({ data }) {
         .append("path")
         .datum(genderData)
         .attr("fill", "none")
-        .attr("stroke", colorScale(gender))
+        .attr("stroke", colorScheme[gender])
         .attr("stroke-width", 2)
         .attr("opacity", 0.6)
         .attr("d", line);
@@ -131,7 +134,7 @@ function Graph5({ data }) {
         .attr("cx", (d) => x(d.year) + x.bandwidth() / 2)
         .attr("cy", (d) => y(d.screenTime))
         .attr("r", 5)
-        .attr("fill", colorScale(gender))
+        .attr("fill", colorScheme[gender])
         .attr("opacity", 0.6)
         .on("mouseover", (event, d) => {
           tooltip.style("opacity", 1);

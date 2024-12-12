@@ -5,9 +5,9 @@ import * as d3 from "d3";
 export const genderGroups = ["Male", "Female", "Other"];
 export const yearOrder = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 export const colorScheme = {
-  Male: "#1f77b4", // Blue
-  Female: "#ff7f0e", // Orange
-  Other: "#2ca02c", // Green
+  Male: "#ffa245", // Orange
+  Female: "#27c498", // Green
+  Other: "#8827c4", // Purple
 };
 
 // Function to generate shapes (used in scatter plot and legend)
