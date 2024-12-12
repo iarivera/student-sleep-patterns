@@ -5,6 +5,7 @@ import Graph2 from "./Graph2";
 import Graph3 from "./Graph3";
 import Graph4 from "./Graph4";
 import Graph5 from "./Graph5";
+import Graph6 from "./Graph6";
 import Legend from "./Legend";
 
 function App() {
@@ -41,7 +42,7 @@ function App() {
         style={{
           display: "flex",
           flexWrap: "wrap",
-          gap: "10px",
+          gap: "20px",
           justifyContent: "space-between",
         }}
       >
@@ -50,6 +51,7 @@ function App() {
         <Graph3 data={data} />
         <Graph4 data={data} />
         <Graph5 data={data} />
+        <Graph6 data={data} />
       </div>
     </div>
   );
