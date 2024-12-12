@@ -17,6 +17,30 @@ body {
   margin: 0 auto;
 }
 
+/* Controls container */
+.controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin: 20px 0;
+}
+
+/* Filter select styling */
+.filter-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+  background-color: white;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.filter-select:hover {
+  border-color: #999;
+}
+
 /* Legend container */
 .legend-container {
   display: flex;
@@ -26,7 +50,7 @@ body {
 
 /* File input styling */
 input[type="file"] {
-  margin: 20px 0;
+  margin: 0;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
