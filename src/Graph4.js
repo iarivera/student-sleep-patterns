@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { genderGroups, colorScheme } from "./Legend";
 
 function Graph4({ data }) {
   const svgRef = useRef();
@@ -12,8 +13,7 @@ function Graph4({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 100, bottom: 70, left: 70 };
-    const genderGroups = ["Male", "Female", "Other"];
+    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
 
     // Calculate gender distribution
     const genderCounts = d3.rollup(
@@ -27,12 +27,6 @@ function Graph4({ data }) {
       gender: key,
       count: value,
     }));
-
-    // Set up colors
-    const color = d3
-      .scaleOrdinal()
-      .domain(genderGroups)
-      .range(["#1f77b4", "#ff7f0e", "#2ca02c"]); // Blue for Male, Orange for Female, Green for Other
 
     // Create pie layout
     const pie = d3
@@ -71,7 +65,7 @@ function Graph4({ data }) {
     arcs
       .append("path")
       .attr("d", arc)
-      .attr("fill", (d) => color(d.data.gender))
+      .attr("fill", (d) => colorScheme[d.data.gender])
       .attr("stroke", "white")
       .style("stroke-width", "2px");
 
@@ -101,37 +95,6 @@ function Graph4({ data }) {
       .style("font-size", "13px")
       .style("fill", "black")
       .text((d) => `(${d.data.count})`);
-
-    // Add legend
-    const legend = svg
-      .append("g")
-      .attr(
-        "transform",
-        `translate(${width - margin.right - 200 + 70}, ${margin.top})`
-      );
-
-    const legendItems = legend
-      .selectAll(".legend-item")
-      .data(genderGroups)
-      .enter()
-      .append("g")
-      .attr("class", "legend-item")
-      .attr("transform", (d, i) => `translate(0, ${i * 25})`);
-
-    // Add colored rectangles to legend
-    legendItems
-      .append("rect")
-      .attr("width", 10)
-      .attr("height", 10)
-      .attr("fill", (d) => color(d));
-
-    // Add text to legend
-    legendItems
-      .append("text")
-      .attr("x", 25)
-      .attr("y", 12)
-      .text((d) => d)
-      .style("font-size", "12px");
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;

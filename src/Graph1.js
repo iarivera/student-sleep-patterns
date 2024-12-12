@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { genderGroups, colorScheme, yearOrder } from "./Legend";
 
 function Graph1({ data }) {
   const svgRef = useRef();
@@ -12,9 +13,7 @@ function Graph1({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 100, bottom: 70, left: 70 };
-    const genderGroups = ["Male", "Female", "Other"];
-    const yearOrder = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
 
     // Group data by year and gender
     const groupedData = yearOrder.map((year) => {
@@ -48,11 +47,6 @@ function Graph1({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    const color = d3
-      .scaleOrdinal()
-      .domain(genderGroups)
-      .range(["#1f77b4", "#ff7f0e", "#2ca02c"]); // Blue for Male, Orange for Female, Green for Other
-
     // Add grid lines
     svg
       .append("g")
@@ -67,8 +61,9 @@ function Graph1({ data }) {
       .style("stroke", "#cccccc")
       .style("stroke-opacity", 0.8)
       .selectAll("line")
-      .style("stroke-dasharray", "2,2"); // Optional: makes the lines dashed
+      .style("stroke-dasharray", "2,2");
 
+    // Create tooltip
     const tooltip = d3
       .select("body")
       .append("div")
@@ -85,7 +80,7 @@ function Graph1({ data }) {
       .data(stackedData)
       .join("g")
       .attr("class", "stack")
-      .attr("fill", (d) => color(d.key))
+      .attr("fill", (d) => colorScheme[d.key])
       .selectAll("rect")
       .data((d) => d)
       .join("rect")
@@ -134,31 +129,6 @@ function Graph1({ data }) {
       )
       .text("Number of Students Per Year")
       .style("font-size", "12px");
-
-    // Legend
-    svg
-      .append("g")
-      .selectAll("rect")
-      .data(genderGroups)
-      .enter()
-      .append("rect")
-      .attr("x", (d, i) => width - margin.right - 200 + i * 70)
-      .attr("y", 10)
-      .attr("width", 10)
-      .attr("height", 10)
-      .attr("fill", (d) => color(d));
-
-    svg
-      .append("g")
-      .selectAll("text")
-      .data(genderGroups)
-      .enter()
-      .append("text")
-      .attr("x", (d, i) => width - margin.right - 185 + i * 70)
-      .attr("y", 20)
-      .text((d) => d)
-      .style("font-size", "12px")
-      .attr("alignment-baseline", "middle");
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;

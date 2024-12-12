@@ -1,27 +1,24 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { genderGroups, colorScheme, yearOrder } from "./Legend";
 
 function Graph2({ data }) {
   const svgRef = useRef();
-  const width = 600; // Width of the graph
-  const height = 450; // Height of the graph
+  const width = 600;
+  const height = 450;
 
   useEffect(() => {
-    if (!data) {
-      return;
-    }
+    if (!data) return;
 
     const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // Clear previous render
+    svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 100, bottom: 70, left: 70 };
-    const genderGroups = ["Male", "Female", "Other"]; // Include "Other" in gender groups
-    const yearOrder = ["1st Year", "2nd Year", "3rd Year", "4th Year"]; // Order the data by University Year
+    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
 
     // Group the data by University Year and Gender, then calculate the average sleep duration for each gender
     const groupedData = d3.group(data, (d) => d.University_Year);
 
-    // Prepare data for the stacked bar chart with averages by gender and university year
+    // Prepare data for the grouped bar chart with averages by gender and university year
     const preparedData = Array.from(groupedData).map(([year, entries]) => {
       const maleData = entries.filter((d) => d.Gender === "Male");
       const femaleData = entries.filter((d) => d.Gender === "Female");
@@ -29,9 +26,9 @@ function Graph2({ data }) {
 
       return {
         University_Year: year,
-        Male: d3.mean(maleData, (d) => +d.Sleep_Duration), // Calculate average sleep duration for Male
-        Female: d3.mean(femaleData, (d) => +d.Sleep_Duration), // Calculate average sleep duration for Female
-        Other: d3.mean(otherData, (d) => +d.Sleep_Duration), // Calculate average sleep duration for Other
+        Male: d3.mean(maleData, (d) => +d.Sleep_Duration),
+        Female: d3.mean(femaleData, (d) => +d.Sleep_Duration),
+        Other: d3.mean(otherData, (d) => +d.Sleep_Duration),
       };
     });
 
@@ -54,15 +51,9 @@ function Graph2({ data }) {
     );
     const y = d3
       .scaleLinear()
-      .domain([0, maxValue * 1.3]) // Add 30% more space at the top
+      .domain([0, maxValue * 1.3])
       .nice()
       .range([height - margin.bottom, margin.top]);
-
-    // Update the color scale to include "Other"
-    const color = d3
-      .scaleOrdinal()
-      .domain(genderGroups)
-      .range(["#1f77b4", "#ff7f0e", "#2ca02c"]); // Blue for Male, Orange for Female, Green for Other
 
     // Add grid lines
     svg
@@ -80,7 +71,7 @@ function Graph2({ data }) {
       .selectAll("line")
       .style("stroke-dasharray", "2,2");
 
-    // Tooltip setup
+    // Create tooltip
     const tooltip = d3
       .select("body")
       .append("div")
@@ -97,7 +88,7 @@ function Graph2({ data }) {
       .data(preparedData)
       .join("g")
       .attr("class", "year")
-      .attr("transform", (d) => `translate(${x0(d.University_Year)}, 0)`) // Align each university year
+      .attr("transform", (d) => `translate(${x0(d.University_Year)}, 0)`)
       .selectAll("rect")
       .data((d) =>
         genderGroups.map((gender) => ({
@@ -105,13 +96,13 @@ function Graph2({ data }) {
           value: d[gender],
           year: d.University_Year,
         }))
-      ) // Map each gender to a value
+      )
       .join("rect")
-      .attr("x", (d) => x1(d.key)) // Position each gender bar side by side
-      .attr("y", (d) => y(d.value || 0)) // Y position depends on the value (height)
-      .attr("height", (d) => y(0) - y(d.value || 0)) // Height of each segment based on the value
-      .attr("width", x1.bandwidth()) // Width of each bar for a gender
-      .attr("fill", (d) => color(d.key)) // Color each segment by gender
+      .attr("x", (d) => x1(d.key))
+      .attr("y", (d) => y(d.value || 0))
+      .attr("height", (d) => y(0) - y(d.value || 0))
+      .attr("width", x1.bandwidth())
+      .attr("fill", (d) => colorScheme[d.key])
       .on("mouseover", (event, d) => {
         tooltip.style("opacity", 1);
         tooltip.html(
@@ -132,7 +123,7 @@ function Graph2({ data }) {
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x0))
-      .selectAll("text") // Rotate x-axis labels
+      .selectAll("text")
       .attr("transform", "rotate(-30)")
       .style("text-anchor", "end");
 
@@ -152,31 +143,6 @@ function Graph2({ data }) {
       )
       .text("Average Sleep Duration (hours)")
       .style("font-size", "12px");
-
-    // Legend
-    svg
-      .append("g")
-      .selectAll("rect")
-      .data(genderGroups)
-      .enter()
-      .append("rect")
-      .attr("x", (d, i) => width - margin.right - 200 + i * 70)
-      .attr("y", 10)
-      .attr("width", 10)
-      .attr("height", 10)
-      .attr("fill", (d) => color(d));
-
-    svg
-      .append("g")
-      .selectAll("text")
-      .data(genderGroups)
-      .enter()
-      .append("text")
-      .attr("x", (d, i) => width - margin.right - 185 + i * 70)
-      .attr("y", 20)
-      .text((d) => d)
-      .style("font-size", "12px")
-      .attr("alignment-baseline", "middle");
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;
