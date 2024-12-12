@@ -144,7 +144,7 @@ function Graph6({ data }) {
       .text((d) => d.replace(/_/g, " "));
 
     // Add legend
-    const legendWidth = width - margin.left - margin.right;
+    const legendWidth = 200; // Fixed width for legend
     const legendHeight = 20;
 
     const legendScale = d3
@@ -161,7 +161,7 @@ function Graph6({ data }) {
       .append("g")
       .attr(
         "transform",
-        `translate(${margin.left},${height - margin.bottom + 90})`
+        `translate(${(width - legendWidth) / 2},${height - margin.bottom + 90})`
       );
 
     const legendGradient = legend

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import { genderGroups, colorScheme, symbolGenerator } from "./Legend";
+import { symbolGenerator, colorScheme } from "./utils";
 import DoubleTrackSlider from "./DoubleTrackSlider";
 
 function Graph3({ data }) {
@@ -183,17 +183,19 @@ function Graph3({ data }) {
       }}
     >
       <svg ref={svgRef} width={width} height={height}></svg>
-      <div style={{ width: "300px", marginBottom: "20px" }}>
-        <div style={{ marginBottom: "5px", fontSize: "12px", color: "#666" }}>
-          Age Range Filter
+      {data && (
+        <div style={{ width: "300px", marginBottom: "20px" }}>
+          <div style={{ marginBottom: "5px", fontSize: "12px", color: "#666" }}>
+            Age Range Filter
+          </div>
+          <DoubleTrackSlider
+            min={18}
+            max={25}
+            step={1}
+            onChange={handleAgeRangeChange}
+          />
         </div>
-        <DoubleTrackSlider
-          min={18}
-          max={25}
-          step={1}
-          onChange={handleAgeRangeChange}
-        />
-      </div>
+      )}
     </div>
   );
 }

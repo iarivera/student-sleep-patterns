@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { yearOrder, genderGroups, colorScheme } from "./Legend";
+import { yearOrder, genderGroups, colorScheme } from "./utils";
 
 function Graph5({ data }) {
   const svgRef = useRef();
