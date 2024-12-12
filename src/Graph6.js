@@ -12,7 +12,7 @@ function Graph6({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 40, right: 30, bottom: 150, left: 100 };
+    const margin = { top: 40, right: 30, bottom: 200, left: 100 };
 
     // Define variables to correlate
     const variables = [
@@ -82,7 +82,7 @@ function Graph6({ data }) {
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Add cells
-    matrix
+    const cells = matrix
       .selectAll("g")
       .data(correlationMatrix)
       .join("g")
@@ -93,11 +93,11 @@ function Graph6({ data }) {
       .attr("x", (d, i) => i * size)
       .attr("width", size)
       .attr("height", size)
-      .style("fill", (d) => getColor(d))
+      .style("fill", "white") // Start with white
       .style("stroke", "white");
 
-    // Add correlation values
-    matrix
+    // Add correlation values with initial opacity 0
+    const texts = matrix
       .selectAll(".correlation-text")
       .data(correlationMatrix)
       .join("g")
@@ -111,7 +111,26 @@ function Graph6({ data }) {
       .attr("dominant-baseline", "middle")
       .style("font-size", "12px")
       .style("fill", (d) => (Math.abs(d) > 0.5 ? "white" : "black"))
-      .text((d) => d.toFixed(2));
+      .style("opacity", 0)
+      .text("0.00"); // Start at 0
+
+    // Animate cells and numbers
+    cells
+      .transition()
+      .duration(750)
+      .style("fill", (d) => getColor(d));
+
+    texts
+      .transition()
+      .delay(300) // Start after cells begin to color
+      .duration(1500)
+      .style("opacity", 1)
+      .tween("text", function (d) {
+        const i = d3.interpolateNumber(0, d);
+        return function (t) {
+          this.textContent = i(t).toFixed(2);
+        };
+      });
 
     // Add row labels
     matrix
