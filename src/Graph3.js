@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { genderGroups, colorScheme, symbolGenerator } from "./Legend";
+import DoubleTrackSlider from "./DoubleTrackSlider";
 
 function Graph3({ data }) {
   const svgRef = useRef();
   const width = 600;
   const height = 450;
+  const [ageRange, setAgeRange] = useState({ min: 18, max: 25 });
 
   useEffect(() => {
     if (!data) return;
@@ -15,24 +17,20 @@ function Graph3({ data }) {
 
     const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
-    const parsedData = data.map((d) => ({
+    // Filter data based on age range
+    const filteredData = data.filter((d) => {
+      const age = parseInt(d.Age);
+      return age >= ageRange.min && age <= ageRange.max;
+    });
+
+    const parsedData = filteredData.map((d) => ({
       Study_Hours: parseFloat(d.Study_Hours),
       Sleep_Quality: parseFloat(d.Sleep_Quality),
       Gender: d.Gender,
+      Age: parseInt(d.Age),
     }));
 
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(parsedData, (d) => d.Study_Hours)])
-      .range([margin.left, width - margin.right]);
-
-    const y = d3
-      .scaleLinear()
-      .domain([0, d3.max(parsedData, (d) => d.Sleep_Quality)])
-      .nice()
-      .range([height - margin.bottom, margin.top]);
-
-    // Calculate point density for each data point
+    // Calculate point density
     const pointDensity = new Map();
     parsedData.forEach((point1) => {
       let nearbyPoints = 0;
@@ -56,6 +54,17 @@ function Graph3({ data }) {
         d3.max(Array.from(pointDensity.values())),
       ])
       .range([0.2, 0.9]);
+
+    const x = d3
+      .scaleLinear()
+      .domain([0, d3.max(parsedData, (d) => d.Study_Hours)])
+      .range([margin.left, width - margin.right]);
+
+    const y = d3
+      .scaleLinear()
+      .domain([0, d3.max(parsedData, (d) => d.Sleep_Quality)])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
 
     // Add title
     svg
@@ -99,7 +108,7 @@ function Graph3({ data }) {
       .selectAll("line")
       .style("stroke-dasharray", "2,2");
 
-    // Add scatter plot points with different shapes and dynamic opacity
+    // Add scatter plot points
     const points = svg.append("g").attr("class", "points");
 
     points
@@ -123,7 +132,8 @@ function Graph3({ data }) {
         (d) => `translate(${x(d.Study_Hours)},${y(d.Sleep_Quality)})`
       )
       .style("fill", (d) => colorScheme[d.Gender])
-      .style("opacity", (d) => pointOpacityScale(pointDensity.get(d)));
+      .style("opacity", (d) => pointOpacityScale(pointDensity.get(d)))
+      .style("stroke", "none");
 
     // Add axes
     svg
@@ -156,9 +166,36 @@ function Graph3({ data }) {
       )
       .text("Sleep Quality")
       .style("font-size", "12px");
-  }, [data]);
+  }, [data, ageRange]);
 
-  return <svg ref={svgRef} width={width} height={height}></svg>;
+  const handleAgeRangeChange = (range) => {
+    setAgeRange(range);
+  };
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "10px",
+      }}
+    >
+      <svg ref={svgRef} width={width} height={height}></svg>
+      <div style={{ width: "300px", marginBottom: "20px" }}>
+        <div style={{ marginBottom: "5px", fontSize: "12px", color: "#666" }}>
+          Age Range Filter
+        </div>
+        <DoubleTrackSlider
+          min={18}
+          max={25}
+          step={1}
+          onChange={handleAgeRangeChange}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default Graph3;
