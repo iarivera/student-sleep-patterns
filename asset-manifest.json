@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/student-sleep-patterns/static/css/main.e6c13ad2.css",
-    "main.js": "/student-sleep-patterns/static/js/main.d7631201.js",
+    "main.css": "/student-sleep-patterns/static/css/main.2558744a.css",
+    "main.js": "/student-sleep-patterns/static/js/main.ac90b9b0.js",
     "static/js/453.5d773ccd.chunk.js": "/student-sleep-patterns/static/js/453.5d773ccd.chunk.js",
     "index.html": "/student-sleep-patterns/index.html",
-    "main.e6c13ad2.css.map": "/student-sleep-patterns/static/css/main.e6c13ad2.css.map",
-    "main.d7631201.js.map": "/student-sleep-patterns/static/js/main.d7631201.js.map",
+    "main.2558744a.css.map": "/student-sleep-patterns/static/css/main.2558744a.css.map",
+    "main.ac90b9b0.js.map": "/student-sleep-patterns/static/js/main.ac90b9b0.js.map",
     "453.5d773ccd.chunk.js.map": "/student-sleep-patterns/static/js/453.5d773ccd.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e6c13ad2.css",
-    "static/js/main.d7631201.js"
+    "static/css/main.2558744a.css",
+    "static/js/main.ac90b9b0.js"
   ]
 }
