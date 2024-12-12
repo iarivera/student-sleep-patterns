@@ -5,6 +5,7 @@ import DoubleTrackSlider from "./DoubleTrackSlider";
 
 function Graph3({ data }) {
   const svgRef = useRef();
+  const isFirstRender = useRef(true);
   const width = 600;
   const height = 450;
   const [ageRange, setAgeRange] = useState({ min: 18, max: 25 });
@@ -14,6 +15,11 @@ function Graph3({ data }) {
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
+
+    // Only set initial opacity to 0 if it's the first render
+    if (isFirstRender.current) {
+      svg.style("opacity", 0);
+    }
 
     const margin = { top: 40, right: 30, bottom: 70, left: 70 };
 
@@ -166,6 +172,12 @@ function Graph3({ data }) {
       )
       .text("Sleep Quality")
       .style("font-size", "12px");
+
+    // At the end of all the drawing, only add fade-in transition for first render
+    if (isFirstRender.current) {
+      svg.transition().duration(300).style("opacity", 1);
+      isFirstRender.current = false;
+    }
   }, [data, ageRange]);
 
   const handleAgeRangeChange = (range) => {
