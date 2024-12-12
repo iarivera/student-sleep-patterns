@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import * as d3 from 'd3';
-import Graph1 from './Graph1';
-import Graph2 from './Graph2';
-import Graph3 from './Graph3';
-import Graph4 from './Graph4';
+import React, { useState } from "react";
+import * as d3 from "d3";
+import Graph1 from "./Graph1";
+import Graph2 from "./Graph2";
+import Graph3 from "./Graph3";
+import Graph4 from "./Graph4";
+import Legend from "./Legend";
 
 function App() {
   const [data, setData] = useState(null);
@@ -24,15 +25,23 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>CSV Graph Dashboard</h1>
+    <div style={{ padding: "20px" }}>
       <input type="file" accept=".csv" onChange={handleFileUpload} />
       <div
         style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '10px',
-          justifyContent: 'space-between',
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "20px",
+        }}
+      >
+        <Legend />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          justifyContent: "space-between",
         }}
       >
         <Graph1 data={data} />

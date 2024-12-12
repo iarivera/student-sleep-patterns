@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { genderGroups, colorScheme, symbolGenerator } from "./Legend";
 
 function Graph3({ data }) {
   const svgRef = useRef();
@@ -12,19 +13,13 @@ function Graph3({ data }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 100, bottom: 70, left: 70 };
-    const genderGroups = ["Male", "Female", "Other"];
+    const margin = { top: 20, right: 30, bottom: 70, left: 70 };
 
     const parsedData = data.map((d) => ({
       Study_Hours: parseFloat(d.Study_Hours),
       Sleep_Quality: parseFloat(d.Sleep_Quality),
       Gender: d.Gender,
     }));
-
-    const color = d3
-      .scaleOrdinal()
-      .domain(genderGroups)
-      .range(["#1f77b4", "#ff7f0e", "#2ca02c"]);
 
     const x = d3
       .scaleLinear()
@@ -37,27 +32,6 @@ function Graph3({ data }) {
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    // Create density data with more thresholds for finer gradation
-    const densityData = d3
-      .contourDensity()
-      .x((d) => x(d.Study_Hours))
-      .y((d) => y(d.Sleep_Quality))
-      .size([
-        width - margin.left - margin.right,
-        height - margin.top - margin.bottom,
-      ])
-      .bandwidth(25) // Slightly smaller bandwidth for more detail
-      .thresholds(15)(parsedData); // More thresholds for finer gradation
-
-    // Create opacity scale based on density values
-    const opacityScale = d3
-      .scaleLinear()
-      .domain([
-        d3.min(densityData, (d) => d.value),
-        d3.max(densityData, (d) => d.value),
-      ])
-      .range([0.1, 0.8]); // Wider opacity range
-
     // Calculate point density for each data point
     const pointDensity = new Map();
     parsedData.forEach((point1) => {
@@ -68,7 +42,6 @@ function Graph3({ data }) {
             Math.pow(point1.Sleep_Quality - point2.Sleep_Quality, 2)
         );
         if (distance < 1) {
-          // Adjust this threshold to control what's considered "nearby"
           nearbyPoints++;
         }
       });
@@ -82,7 +55,7 @@ function Graph3({ data }) {
         d3.min(Array.from(pointDensity.values())),
         d3.max(Array.from(pointDensity.values())),
       ])
-      .range([0.2, 0.9]); // More transparent for sparse areas, more opaque for dense areas
+      .range([0.2, 0.9]);
 
     // Add y-axis grid lines
     svg
@@ -116,32 +89,6 @@ function Graph3({ data }) {
       .selectAll("line")
       .style("stroke-dasharray", "2,2");
 
-    // Add contours with dynamic opacity
-    const contours = svg.append("g").attr("class", "contours");
-
-    contours
-      .selectAll("path")
-      .data(densityData)
-      .enter()
-      .append("path")
-      .attr("d", d3.geoPath())
-      .attr("fill", "none")
-      .attr("stroke", "#666")
-      .attr("stroke-opacity", (d) => opacityScale(d.value))
-      .attr("stroke-width", 0.5)
-      .attr("transform", `translate(${0}, ${0})`);
-
-    // Function to create different shapes
-    const symbolGenerator = (type, size) => {
-      if (type === "triangle") {
-        return d3.symbol().type(d3.symbolTriangle).size(size)();
-      } else if (type === "square") {
-        return d3.symbol().type(d3.symbolSquare).size(size)();
-      } else {
-        return d3.symbol().type(d3.symbolCircle).size(size)();
-      }
-    };
-
     // Add scatter plot points with different shapes and dynamic opacity
     const points = svg.append("g").attr("class", "points");
 
@@ -151,7 +98,7 @@ function Graph3({ data }) {
       .enter()
       .append("path")
       .attr("d", (d) => {
-        const shapeSize = 100; // Increased size for all shapes
+        const shapeSize = 100;
         switch (d.Gender) {
           case "Male":
             return symbolGenerator("triangle", shapeSize);
@@ -165,7 +112,7 @@ function Graph3({ data }) {
         "transform",
         (d) => `translate(${x(d.Study_Hours)},${y(d.Sleep_Quality)})`
       )
-      .style("fill", (d) => color(d.Gender))
+      .style("fill", (d) => colorScheme[d.Gender])
       .style("opacity", (d) => pointOpacityScale(pointDensity.get(d)));
 
     // Add axes
@@ -199,45 +146,6 @@ function Graph3({ data }) {
       )
       .text("Sleep Quality")
       .style("font-size", "12px");
-
-    // Add legend with matching shapes
-    const legendGroup = svg.append("g");
-
-    // Add shapes to legend
-    legendGroup
-      .selectAll("path")
-      .data(genderGroups)
-      .enter()
-      .append("path")
-      .attr("d", (d) => {
-        const shapeSize = 100; // Match size with scatter plot
-        switch (d) {
-          case "Male":
-            return symbolGenerator("triangle", shapeSize);
-          case "Female":
-            return symbolGenerator("square", shapeSize);
-          default:
-            return symbolGenerator("circle", shapeSize);
-        }
-      })
-      .attr(
-        "transform",
-        (d, i) => `translate(${width - margin.right - 195 + i * 70}, 15)`
-      )
-      .attr("fill", (d) => color(d))
-      .style("opacity", 0.9); // Keep legend shapes fully visible
-
-    // Add text to legend
-    legendGroup
-      .selectAll("text")
-      .data(genderGroups)
-      .enter()
-      .append("text")
-      .attr("x", (d, i) => width - margin.right - 185 + i * 70)
-      .attr("y", 20)
-      .text((d) => d)
-      .style("font-size", "12px")
-      .attr("alignment-baseline", "middle");
   }, [data]);
 
   return <svg ref={svgRef} width={width} height={height}></svg>;
